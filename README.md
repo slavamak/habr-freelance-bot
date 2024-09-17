@@ -1,6 +1,5 @@
 # Habr Freelance task notifier telegram bot
 
-## Description
 This is a Telegram bot that monitors freelance tasks on Habr and notifies users about new tasks based on their specified filters. Users can add, remove, and list their filters, allowing for customized notifications tailored to their interests.
 
 ## Features
