@@ -10,10 +10,10 @@ const commands = [
 ];
 
 const filters = {};
-let lastTasks = [];
+const lastTasks = {};
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-bot.start((ctx) => ctx.reply('Welcome'));
+bot.command('start', (ctx) => ctx.reply('Welcome'));
 
 bot.command('help', (ctx) => {
   ctx.reply(fmt`
@@ -34,11 +34,11 @@ bot.command('add_filter', (ctx) => {
   const category = args[0] || '';
   const query = args[1] || '';
   const userId = ctx.from.id;
-  if (!filters[userId]) {
-    filters[userId] = [];
-  }
+  if (!filters[userId]) filters[userId] = [];
   filters[userId].push({ category, query });
-  ctx.reply(`Filter added: category="${category}", query="${query}"`);
+  const message = `Filter added: category="${category}", query="${query}"`
+  ctx.reply(message);
+  console.log('add_filter', message);
 });
 
 bot.command('remove_filter', (ctx) => {
@@ -47,9 +47,13 @@ bot.command('remove_filter', (ctx) => {
   const userId = ctx.from.id;
   if (filters[userId] && filters[userId][filterIndex]) {
     filters[userId].splice(filterIndex, 1);
-    ctx.reply(`Filter ${filterIndex} deleted.`);
+    const message = `Filter ${filterIndex} deleted.`
+    ctx.reply(message);
+    console.log('remove_filter', message);
   } else {
-    ctx.reply('Filter not found.');
+    const message = 'Filter not found.'
+    ctx.reply(message);
+    console.log('remove_filter', message);
   }
 });
 
@@ -65,7 +69,7 @@ bot.command('list_filters', (ctx) => {
 
 async function checkForNewTasks() {
   const userIds = Object.keys(filters);
-  let tasksToNotify = [];
+  const tasksToNotify = [];
   for (const userId of userIds) {
     const userFilters = filters[userId];
     for (const filter of userFilters) {
@@ -76,10 +80,13 @@ async function checkForNewTasks() {
       if (query) url.searchParams.set('q', query)
       const response = await fetch(url);
       const data = await response.json();
-      const newTasks = data.filter(task => !lastTasks.some(lastTask => lastTask.id === task.id));
-      tasksToNotify = tasksToNotify.concat(newTasks);
+      data.forEach(task => {
+        if (!lastTasks[task.id]) {
+          tasksToNotify.push(task);
+          lastTasks[task.id] = task;
+        };
+      });
     }
-
     tasksToNotify.forEach(task => {
       const message = fmt`
 ${bold`New Task:`} ${task.title}
@@ -91,23 +98,21 @@ ${bold`Comments Count:`} ${task.task_comments_count}
 ${bold`Page Views:`} ${task.page_views_count}
 ${bold`Link:`} ${link("View Task", task.url)}
     `;
-
       bot.telegram.sendMessage(userId, message);
       console.log('New task added:', message.text);
     });
   }
-
-  if (tasksToNotify.length === 0) console.log('No new tasks')
+  if (tasksToNotify.length === 0) console.log('No new tasks added')
   else console.log('New tasks added:', tasksToNotify.length);
-
-  lastTasks = [...lastTasks, ...tasksToNotify];
 }
 
-bot.telegram.setMyCommands(commands).then(() => {
+async function main() {
+  await bot.telegram.setMyCommands(commands);
   bot.launch();
   console.log('Bot started!');
   setInterval(checkForNewTasks, 60000);
-});
+  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+}
 
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+main()
