@@ -1,0 +1,16 @@
+{
+  "name": "habr-freelance-bot",
+  "version": "1.0.0",
+  "description": "Habr Freelance task notifier telegram bot",
+  "license": "MIT",
+  "keywords": ["habr", "freelance", "bot", "telegram"],
+  "type": "module",
+  "main": "./src/index.js",
+  "scripts": {
+    "dev": "node --env-file=.env ./src/index.js",
+    "start": "node ./src/index.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3"
+  }
+}
