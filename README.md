@@ -1,6 +1,6 @@
-# Habr Freelance task notifier telegram bot
+# Habr Freelance Task Notifier Telegram Bot
 
-This is a Telegram bot that monitors freelance tasks on Habr and notifies users about new tasks based on their specified filters. Users can add, remove, and list their filters, allowing for customized notifications tailored to their interests.
+This is a Telegram bot that monitors freelance tasks on Habr and notifies users about new tasks based on their specified filters. Users can add, remove, and list their filters.
 
 ## Features
 - Add filters for categories and search queries.
@@ -32,16 +32,21 @@ This is a Telegram bot that monitors freelance tasks on Habr and notifies users 
 
 ## Running the Bot
 
-To start the bot, run the following command:
+### Development
+To run the bot in development, execute the following command:
 ```bash
 pnpm dev
 ```
+The bot will start and check for new tasks every 60 seconds.
 
-The bot will start running and will check for new tasks every 60 seconds.
+### Production
+For running the bot in a production environment, use the following command:
+```bash
+pnpm start
+```
 
-## Docker Support
-
-If you prefer to run the bot in a Docker container, run the following command:
+#### Running with Docker
+If you prefer to deploy the bot using Docker, you can do so with the following command:
 ```bash
 docker compose up --build -d
 ```
